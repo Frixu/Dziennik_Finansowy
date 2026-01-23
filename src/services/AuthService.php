@@ -11,10 +11,18 @@ class AuthService
 
         $email = trim($email);
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        // 1. pusty
+        if ($email === '') {
+        $errors[] = 'Email jest wymagany.';
+
+        // 2. za długi
+        } elseif (strlen($email) > 254) {
+            $errors[] = 'Email jest za długi.';
+
+        // 3. zły format
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'Nieprawidłowy email.';
         }
-
         if (strlen($password) < 8) {
             $errors[] = 'Hasło musi mieć minimum 8 znaków.';
         }
