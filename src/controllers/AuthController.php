@@ -18,6 +18,12 @@ class AuthController
 
     public function register(): void
     {
+        //dodatkowa ochrona - tylko POST
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+            header('Location: /register');
+            exit;
+        }
+
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
         $passwordRepeat = $_POST['password_repeat'] ?? '';
@@ -35,6 +41,12 @@ class AuthController
 
     public function login(): void
 {
+    //dodatkowa ochrona - tylko POST
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+        header('Location: /login');
+        exit;
+    }
+
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
 
