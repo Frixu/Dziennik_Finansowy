@@ -138,8 +138,14 @@
                   </td>
                   <td><?= htmlspecialchars($t['category_name']) ?></td>
                   <td><?= htmlspecialchars($t['description'] ?? '') ?></td>
-                  <td class="amount"><?= htmlspecialchars($t['amount']) ?> zł</td>
-
+                  <?php
+                    $isExpense = ($t['type'] === 'expense');
+                    $sign = $isExpense ? '-' : '+';
+                    $amountFormatted = number_format((float)$t['amount'], 2, ',', ' ');
+                    ?>
+                  <td class="amount <?= $isExpense ? 'amount-negative' : 'amount-positive' ?>">
+                  <?= $sign . $amountFormatted ?> zł
+                  </td>
                   <td>
                     <button
                       type="button"

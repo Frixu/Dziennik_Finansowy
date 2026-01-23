@@ -6,6 +6,7 @@ class AuthService
 
     public function register(string $email, string $password, string $passwordRepeat): array
     {
+
         $errors = [];
 
         $email = trim($email);
@@ -31,33 +32,35 @@ class AuthService
         }
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
-        $this->users->create($email, $hash);
 
-        $userId = $this->users->create($email, $hash);
+        // tworzenie tylko raz + ochrona przed UNIQUE violation
+        try {
+            $userId = $this->users->create($email, $hash);
+        } catch (PDOException $e) {
+            if (($e->getCode() ?? '') === '23505') {
+                return ['ok' => false, 'errors' => ['Konto o takim emailu już istnieje.']];
+            }
+            return ['ok' => false, 'errors' => ['Wystąpił błąd serwera.']];
+        }
 
         $defaultCategories = ['Jedzenie','Transport','Rachunki','Rozrywka','Inne','Wynagrodzenie'];
         foreach ($defaultCategories as $name) {
-        $this->users->addCategory($userId, $name);
+            $this->users->addCategory($userId, $name);
         }
 
-        return ['ok' => true, 'errors' => []]; 
+        return ['ok' => true, 'errors' => []];
     }
 
     public function login(string $email, string $password): array
-{
-    $email = trim($email);
+    {
+        $email = trim($email);
 
-    $user = $this->users->findByEmail($email);
+        $user = $this->users->findByEmail($email);
 
-    if (!$user) {
-        return ['ok' => false, 'error' => 'Nieprawidłowy email lub hasło'];
+        if (!$user || !password_verify($password, $user['password_hash'])) {
+            return ['ok' => false, 'error' => 'Nieprawidłowy email lub hasło'];
+        }
+
+        return ['ok' => true, 'user' => $user];
     }
-
-    if (!password_verify($password, $user['password_hash'])) {
-        return ['ok' => false, 'error' => 'Nieprawidłowy email lub hasło'];
-    }
-
-    return ['ok' => true, 'user' => $user];
-}
-
 }
