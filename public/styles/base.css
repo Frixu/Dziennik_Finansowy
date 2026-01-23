@@ -1,0 +1,16 @@
+/* WSPÓLNE TŁO CAŁEJ APLIKACJI */
+body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+  background: linear-gradient(
+    135deg,
+    rgb(102, 126, 234),
+    rgb(118, 75, 162)
+  );
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
