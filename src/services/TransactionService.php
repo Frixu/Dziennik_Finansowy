@@ -12,7 +12,12 @@ class TransactionService
         $type = $data['type'] ?? '';
         $categoryId = (int)($data['category_id'] ?? 0);
         $amount = trim((string)($data['amount'] ?? ''));
-        $description = trim((string)($data['description'] ?? ''));
+        $description = trim($data['description'] ?? '');
+
+if (strlen($description) > 255) {
+    return ['ok' => false, 'error' => 'Opis jest za długi (max 255 znaków).'];
+}
+
         $occurredOn = $data['occurred_on'] ?? date('Y-m-d');
 
         $errors = [];
@@ -57,6 +62,11 @@ class TransactionService
     $categoryId = (int)($data['category_id'] ?? 0);
     $amount = trim((string)($data['amount'] ?? ''));
     $description = trim((string)($data['description'] ?? ''));
+
+if (strlen($description) > 255) {
+    return ['ok' => false, 'error' => 'Opis jest za długi (max 255 znaków).'];
+}
+
     $occurredOn = $data['occurred_on'] ?? date('Y-m-d');
 
     $errors = [];

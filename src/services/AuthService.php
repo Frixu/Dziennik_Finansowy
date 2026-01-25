@@ -23,7 +23,10 @@ class AuthService
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'Nieprawidłowy email.';
         }
-        if (strlen($password) < 8) {
+
+        if (strlen($password) > 255) {
+            $errors[] = 'Hasło jest za długie.';
+        } elseif (strlen($password) < 8) {
             $errors[] = 'Hasło musi mieć minimum 8 znaków.';
         }
 
@@ -62,6 +65,11 @@ class AuthService
     public function login(string $email, string $password): array
     {
         $email = trim($email);
+
+if ($email === '' || strlen($email) > 254 || strlen($password) > 255) {
+    return ['ok' => false, 'error' => 'Nieprawidłowy email lub hasło'];
+}
+
 
         $user = $this->users->findByEmail($email);
 
