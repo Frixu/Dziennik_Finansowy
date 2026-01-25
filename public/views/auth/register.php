@@ -1,11 +1,3 @@
-<?php if (!empty($errors)): ?>
-  <div class="errors">
-    <?php foreach ($errors as $e): ?>
-      <p><?= htmlspecialchars($e) ?></p>
-    <?php endforeach; ?>
-  </div>
-<?php endif; ?>
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -16,10 +8,20 @@
 </head>
 <body>
 
+<?php if (!empty($errors)): ?>
+  <div class="errors">
+    <?php foreach ($errors as $e): ?>
+      <p><?= htmlspecialchars($e) ?></p>
+    <?php endforeach; ?>
+  </div>
+<?php endif; ?>
+
   <div class="login-container">
     <h1>Zarejestruj się</h1>
 
     <form id="registerForm" class="auth-form" method="post" action="/register">
+      <input type="hidden" name="csrf_token"
+       value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
 
       <div class="form-group">
         <label>Email</label>
