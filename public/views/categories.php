@@ -46,7 +46,7 @@
         <form method="POST" action="/categories" class="form-grid">
           <div>
             <label for="name">Nazwa</label>
-            <input id="name" name="name" type="text" placeholder="np. Siłownia" required>
+            <input id="name" name="name" type="text" placeholder="np. Siłownia" maxlength="50" required>
           </div>
           <div class="modal-actions" style="justify-content:flex-start;">
             <button class="btn btn-primary" type="submit">Dodaj</button>
