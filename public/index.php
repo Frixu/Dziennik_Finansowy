@@ -1,6 +1,29 @@
 <?php
 
-<?php
+$env = $_ENV['APP_ENV'] ?? 'dev';
+
+if ($env === 'prod') {
+    ini_set('display_errors', '0');
+    ini_set('display_startup_errors', '0');
+    error_reporting(E_ALL);
+} else {
+    ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
+    error_reporting(E_ALL);
+}
+
+set_exception_handler(function (Throwable $e) use ($env) {
+    error_log((string)$e); // zapis do logów
+
+    http_response_code(500);
+
+    if ($env === 'prod') {
+        echo 'Wystąpił błąd serwera. Spróbuj ponownie później.';
+    } else {
+        // DEV: pokaż szczegóły
+        echo '<pre>' . htmlspecialchars((string)$e, ENT_QUOTES, 'UTF-8') . '</pre>';
+    }
+});
 
 session_set_cookie_params([
     'lifetime' => 0,

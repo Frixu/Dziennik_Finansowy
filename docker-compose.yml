@@ -13,6 +13,7 @@ services:
       - php
     networks:
       - pg-network
+
   
   db:
     build:
@@ -35,6 +36,8 @@ services:
       - .:/app
     networks:
       - pg-network
+    environment:
+      - APP_ENV=prod
   
   pgadmin-wdpai:
     image: dpage/pgadmin4:latest
