@@ -267,6 +267,64 @@ if ($method === 'POST' && $path === '/transactions/delete') {
     exit;
 }
 
+if ($method === 'GET' && $path === '/transactions/export') {
+    if (!isset($_SESSION['user_id'])) {
+        header('Location: /login');
+        exit;
+    }
+
+    $year = (int)($_GET['year'] ?? date('Y'));
+    $month = (int)($_GET['month'] ?? date('n'));
+
+    if ($year < 2000 || $year > 2100) $year = (int)date('Y');
+    if ($month < 1 || $month > 12) $month = (int)date('n');
+
+    $startDate = new DateTimeImmutable(sprintf('%04d-%02d-01', $year, $month));
+    $endDate = $startDate->modify('+1 month');
+
+    $start = $startDate->format('Y-m-d');
+    $end = $endDate->format('Y-m-d');
+
+    $txRepo = new TransactionRepository($pdo);
+    $rows = $txRepo->listForUserInRange($_SESSION['user_id'], $start, $end, 5000);
+
+    $filename = sprintf('transakcje_%04d-%02d.csv', $year, $month);
+
+    header('Content-Type: text/csv; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
+    $out = fopen('php://output', 'w');
+
+    // BOM dla Excela (żeby polskie znaki działały)
+    fwrite($out, "\xEF\xBB\xBF");
+
+    // nagłówki
+    fputcsv($out, ['Data', 'Typ', 'Kategoria', 'Opis', 'Kwota (zł)'], ';');
+
+    foreach ($rows as $t) {
+        $isExpense = ($t['type'] === 'expense');
+        $typeLabel = $isExpense ? 'Wydatek' : 'Przychód';
+        $sign = $isExpense ? '-' : '+';
+
+        // kwota jako liczba z kropką do CSV (Excel i tak ogarnie, ale to jest najczyściej)
+        $amount = (float)$t['amount'];
+        $amountSigned = $sign . number_format($amount, 2, '.', '');
+
+        fputcsv($out, [
+            $t['occurred_on'],
+            $typeLabel,
+            $t['category_name'],
+            $t['description'] ?? '',
+            $amountSigned,
+        ], ';');
+    }
+
+    fclose($out);
+    exit;
+}
+
 if ($method === 'GET' && $path === '/logout') {
     // (opcjonalnie) jeśli nie jesteś zalogowany, i tak wyczyść
     $_SESSION = [];
