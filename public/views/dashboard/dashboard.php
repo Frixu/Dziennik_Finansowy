@@ -24,11 +24,12 @@
     <div class="topbar">
       <div class="brand">
         <h1>Dziennik finansowy</h1>
-        <p>Zalogowany jako: <?= htmlspecialchars($_SESSION['user_email']) ?></p>
+        <p>Zalogowany jako: <?= htmlspecialchars($_SESSION['user_email'] ?? '') ?></p>
       </div>
 
       <div class="actions">
-        <button class="btn btn-primary" id="openAddTx">+ Dodaj transakcję</button>
+        <!-- WAŻNE: type="button" żeby nigdy nie próbował submitować formularza -->
+        <button type="button" class="btn btn-primary" id="openAddTx">+ Dodaj transakcję</button>
         <a class="btn btn-ghost" href="/categories">Kategorie</a>
         <a class="btn btn-ghost" href="/logout">Wyloguj</a>
       </div>
@@ -39,30 +40,30 @@
       <div class="card">
         <p class="kpi-title">Saldo</p>
         <p class="kpi-value">
-          <?= number_format($kpi['balance'], 2, ',', ' ') ?> zł
+          <?= number_format((float)($kpi['balance'] ?? 0), 2, ',', ' ') ?> zł
         </p>
         <p class="kpi-sub">
-          <?= htmlspecialchars($months[$selectedMonth]) ?> <?= $selectedYear ?>
+          <?= htmlspecialchars($months[$selectedMonth] ?? '') ?> <?= (int)$selectedYear ?>
         </p>
       </div>
 
       <div class="card">
         <p class="kpi-title">Przychody</p>
         <p class="kpi-value">
-          <?= number_format($kpi['income'], 2, ',', ' ') ?> zł
+          <?= number_format((float)($kpi['income'] ?? 0), 2, ',', ' ') ?> zł
         </p>
         <p class="kpi-sub">
-          <?= htmlspecialchars($months[$selectedMonth]) ?> <?= $selectedYear ?>
+          <?= htmlspecialchars($months[$selectedMonth] ?? '') ?> <?= (int)$selectedYear ?>
         </p>
       </div>
 
       <div class="card">
         <p class="kpi-title">Wydatki</p>
         <p class="kpi-value">
-          <?= number_format($kpi['expense'], 2, ',', ' ') ?> zł
+          <?= number_format((float)($kpi['expense'] ?? 0), 2, ',', ' ') ?> zł
         </p>
         <p class="kpi-sub">
-          <?= htmlspecialchars($months[$selectedMonth]) ?> <?= $selectedYear ?>
+          <?= htmlspecialchars($months[$selectedMonth] ?? '') ?> <?= (int)$selectedYear ?>
         </p>
       </div>
     </div>
@@ -73,15 +74,15 @@
         <div>
           <h2>Historia transakcji</h2>
           <div class="section-sub">
-            <?= htmlspecialchars($months[$selectedMonth]) ?> <?= $selectedYear ?>
+            <?= htmlspecialchars($months[$selectedMonth] ?? '') ?> <?= (int)$selectedYear ?>
           </div>
         </div>
 
         <form method="GET" action="/dashboard" class="filter-bar">
           <select name="month">
             <?php foreach ($months as $m => $label): ?>
-              <option value="<?= $m ?>" <?= $selectedMonth === $m ? 'selected' : '' ?>>
-                <?= $label ?>
+              <option value="<?= (int)$m ?>" <?= $selectedMonth === (int)$m ? 'selected' : '' ?>>
+                <?= htmlspecialchars($label) ?>
               </option>
             <?php endforeach; ?>
           </select>
@@ -91,13 +92,13 @@
               $currentYear = (int)date('Y');
               for ($y = $currentYear - 3; $y <= $currentYear + 1; $y++):
             ?>
-              <option value="<?= $y ?>" <?= $selectedYear === $y ? 'selected' : '' ?>>
-                <?= $y ?>
+              <option value="<?= (int)$y ?>" <?= $selectedYear === (int)$y ? 'selected' : '' ?>>
+                <?= (int)$y ?>
               </option>
             <?php endfor; ?>
           </select>
 
-          <button class="btn btn-ghost">Filtruj</button>
+          <button class="btn btn-ghost" type="submit">Filtruj</button>
         </form>
       </div>
 
@@ -114,24 +115,26 @@
             </tr>
           </thead>
           <tbody>
-            <?php if (!$latestTransactions): ?>
+            <?php if (empty($latestTransactions)): ?>
               <tr>
                 <td colspan="6">Brak transakcji</td>
               </tr>
             <?php else: ?>
               <?php foreach ($latestTransactions as $t): ?>
                 <?php
-                  $isExpense = $t['type'] === 'expense';
+                  $isExpense = ($t['type'] ?? '') === 'expense';
                   $sign = $isExpense ? '-' : '+';
                 ?>
                 <tr>
-                  <td><?= htmlspecialchars($t['occurred_on']) ?></td>
+                  <td><?= htmlspecialchars($t['occurred_on'] ?? '') ?></td>
                   <td><?= $isExpense ? 'Wydatek' : 'Przychód' ?></td>
-                  <td><?= htmlspecialchars($t['category_name']) ?></td>
+                  <td><?= htmlspecialchars($t['category_name'] ?? '') ?></td>
                   <td><?= htmlspecialchars($t['description'] ?? '') ?></td>
                   <td class="<?= $isExpense ? 'amount-negative' : 'amount-positive' ?>">
-                    <?= $sign . number_format($t['amount'], 2, ',', ' ') ?> zł
+                    <?= $sign . number_format((float)($t['amount'] ?? 0), 2, ',', ' ') ?> zł
                   </td>
+
+                  <!-- Jeśli kiedyś dodasz Edytuj/Usuń, dashboard.js już ma delegację eventów -->
                   <td>—</td>
                 </tr>
               <?php endforeach; ?>
@@ -147,7 +150,7 @@
         <div>
           <h2>Porównanie: przychody vs wydatki</h2>
           <div class="section-sub">
-            <?= htmlspecialchars($months[$selectedMonth]) ?> <?= $selectedYear ?>
+            <?= htmlspecialchars($months[$selectedMonth] ?? '') ?> <?= (int)$selectedYear ?>
           </div>
         </div>
       </div>
@@ -160,9 +163,81 @@
   </div>
 </div>
 
+<!-- MODAL: DODAJ / EDYTUJ TRANSAKCJĘ (wymagany przez dashboard.js) -->
+<div class="modal-backdrop" id="txModalBackdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="txModalTitle">
+    <div class="modal-header">
+      <h3 id="txModalTitle">Dodaj transakcję</h3>
+      <button type="button" class="modal-close" id="closeTxModal" aria-label="Zamknij">×</button>
+    </div>
+
+    <div class="modal-body">
+      <form method="POST" action="/transactions" id="txForm">
+        <input type="hidden" name="tx_id" id="tx_id" value="">
+        <input type="hidden" name="redirect_year" value="<?= (int)$selectedYear ?>">
+        <input type="hidden" name="redirect_month" value="<?= (int)$selectedMonth ?>">
+
+        <div class="form-grid">
+
+          <div class="form-row">
+            <div>
+              <label for="type">Typ</label>
+              <select id="type" name="type">
+                <option value="expense">Wydatek</option>
+                <option value="income">Przychód</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="occurred_on">Data</label>
+              <input id="occurred_on" type="date" name="occurred_on" value="<?= htmlspecialchars(date('Y-m-d')) ?>">
+            </div>
+          </div>
+
+          <div>
+            <label for="category_id">Kategoria</label>
+            <select id="category_id" name="category_id" required>
+              <?php if (empty($categories)): ?>
+                <option value="">Brak kategorii</option>
+              <?php else: ?>
+                <?php foreach ($categories as $cat): ?>
+                  <option value="<?= (int)($cat['id'] ?? 0) ?>">
+                    <?= htmlspecialchars($cat['name'] ?? '') ?>
+                  </option>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div>
+              <label for="amount">Kwota</label>
+              <input id="amount" type="number" step="0.01" min="0.01" name="amount" placeholder="np. 29.99" required>
+            </div>
+            <div>
+              <label for="description">Opis</label>
+              <input id="description" type="text" name="description" placeholder="np. Zakupy">
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" id="closeTxModalSecondary">Anuluj</button>
+            <button type="submit" class="btn btn-primary" id="txSubmitBtn">Zapisz</button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script src="/js/dashboard.js" defer></script>
+
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  const values = <?= json_encode([(float)$kpi['income'], (float)$kpi['expense']]) ?>;
+  const values = <?= json_encode([(float)($kpi['income'] ?? 0), (float)($kpi['expense'] ?? 0)]) ?>;
 
   const ctx = document.getElementById('incomeExpenseChart');
   if (ctx) {
