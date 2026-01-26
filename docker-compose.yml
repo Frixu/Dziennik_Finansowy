@@ -36,9 +36,11 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
-      - pg-data:/var/lib/postgresql/data
+      - pg-data:/var/lib/postgresql
+      - ./docker/db/init:/docker-entrypoint-initdb.d:ro
     networks:
       - pg-network
+
 
   pgadmin-wdpai:
     image: dpage/pgadmin4:latest
