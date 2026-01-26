@@ -82,7 +82,7 @@ public function login(): void
         return;
     }
 
-    session_regenerate_id(true);
+    
 
     $_SESSION['user_id'] = $result['user']['id'];
     $_SESSION['user_email'] = $result['user']['email'];
