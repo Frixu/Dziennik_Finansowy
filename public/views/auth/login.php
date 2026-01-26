@@ -26,6 +26,7 @@
                 name="email" 
                 placeholder="test@test.pl"
                 required
+                maxlength="254"
             >
         </div>
 
@@ -35,6 +36,7 @@
                 type="password" 
                 id="password" 
                 name="password" 
+                maxlength="255"
                 required
             >
         </div>

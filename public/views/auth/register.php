@@ -25,19 +25,19 @@
 
       <div class="form-group">
         <label>Email</label>
-        <input type="email" name="email" id="email" required>
+        <input type="email" name="email" id="email" maxlength="254"required>
         <small class="error"></small>
       </div>
 
       <div class="form-group">
         <label>Hasło</label>
-        <input type="password" name="password" id="password" required>
+        <input type="password" name="password" id="password" maxlength="255" required>
         <small class="error"></small>
       </div>
 
       <div class="form-group">
         <label>Powtórz hasło</label>
-        <input type="password" name="password_repeat" id="passwordRepeat" required>
+        <input type="password" name="password_repeat" id="passwordRepeat" maxlength="255" required>
         <small class="error"></small>
       </div>
 
