@@ -185,14 +185,34 @@ body {
   background: rgba(79, 70, 229, 1);
 }
 
+/* --- FIX: linki btn-ghost bez fioletowego :visited --- */
 .btn-ghost {
   background: rgba(255,255,255,0.75);
   border: 1px solid rgba(0,0,0,0.10);
+  color: rgba(0,0,0,0.85);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-ghost:hover {
-  background: rgba(255,255,255,0.9);
+/* ważne: obsługa linków */
+a.btn-ghost:link,
+a.btn-ghost:visited {
+  color: rgba(0,0,0,0.85);
+  text-decoration: none;
 }
+
+/* hover/focus */
+a.btn-ghost:hover,
+a.btn-ghost:focus,
+.btn-ghost:hover,
+.btn-ghost:focus {
+  color: #4c1d95;
+  text-decoration: none;
+}
+
+
 
 /* Modal */
 .modal-backdrop {
