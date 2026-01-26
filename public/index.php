@@ -111,12 +111,15 @@ $selectedMonth = $month;
     $latestTransactions = $txRepo->listForUserInRange($_SESSION['user_id'], $start, $end, 50);
     $kpi = $txRepo->monthSummary($_SESSION['user_id'], $start, $end);
 
-    $start = (new DateTimeImmutable('first day of this month'))->format('Y-m-d');
-    $end = (new DateTimeImmutable('first day of next month'))->format('Y-m-d');
-
+    $incomeVsExpenseJson = json_encode([
+    (float)($kpi['income'] ?? 0),
+    (float)($kpi['expense'] ?? 0),
+]);
     require __DIR__ . '/../public/views/dashboard/dashboard.php';
     exit;
 }
+
+
 
 if ($method === 'POST' && $path === '/transactions') {
     if (!isset($_SESSION['user_id'])) {

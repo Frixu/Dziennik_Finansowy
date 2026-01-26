@@ -76,6 +76,37 @@ class TransactionRepository
     ];
 }
 
+public function expensesByCategory(int $userId, string $start, string $endExclusive): array
+{
+    $stmt = $this->pdo->prepare(
+        "SELECT c.name AS category_name,
+                COALESCE(SUM(t.amount), 0) AS total
+         FROM transactions t
+         JOIN categories c ON c.id = t.category_id
+         WHERE t.user_id = :user_id
+           AND t.type = 'expense'
+           AND t.occurred_on >= :start
+           AND t.occurred_on < :end
+         GROUP BY c.name
+         ORDER BY total DESC"
+    );
+
+    $stmt->execute([
+        ':user_id' => $userId,
+        ':start'   => $start,
+        ':end'     => $endExclusive,
+    ]);
+
+    $rows = $stmt->fetchAll() ?: [];
+
+    // Postgres NUMERIC często wraca jako string -> rzutujemy
+    foreach ($rows as &$r) {
+        $r['total'] = (float)$r['total'];
+    }
+
+    return $rows;
+}
+
 public function listForUserInRange(int $userId, string $start, string $endExclusive, int $limit = 50): array
 {
     $stmt = $this->pdo->prepare(
