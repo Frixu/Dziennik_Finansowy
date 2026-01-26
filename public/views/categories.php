@@ -9,7 +9,7 @@
 <body>
 
 <div class="dashboard-shell">
-  <div class="dashboard-container">d
+  <div class="dashboard-container">
 
     <div class="topbar">
       <div class="brand">
