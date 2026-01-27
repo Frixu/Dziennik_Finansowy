@@ -99,12 +99,11 @@
           </select>
 
           <button class="btn btn-ghost" type="submit">Filtruj</button>
-          <a class="btn btn-ghost"
-   href="/transactions/export?year=<?= (int)$selectedYear ?>&month=<?= (int)$selectedMonth ?>"
-   style="text-decoration:none; display:inline-flex; align-items:center;">
-  Eksport CSV
-</a>
 
+          <a class="btn btn-ghost"
+             href="/transactions/export?year=<?= (int)$selectedYear ?>&month=<?= (int)$selectedMonth ?>">
+            Eksport CSV
+          </a>
         </form>
       </div>
 
@@ -236,7 +235,6 @@
     </div>
   </div>
 </div>
-
 
 <script src="/js/dashboard.js" defer></script>
 

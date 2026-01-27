@@ -185,7 +185,21 @@ body {
   background: rgba(79, 70, 229, 1);
 }
 
-/* --- FIX: linki btn-ghost bez fioletowego :visited --- */
+/* =========================================================
+   FIX: linki jako przyciski – bez fioletowego :visited
+   (robimy wysoką specyfikę + !important, żeby przebić base.css)
+   ========================================================= */
+a.btn,
+a.btn:link,
+a.btn:visited,
+a.btn:hover,
+a.btn:active,
+a.btn:focus {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+/* --- btn-ghost --- */
 .btn-ghost {
   background: rgba(255,255,255,0.75);
   border: 1px solid rgba(0,0,0,0.10);
@@ -196,23 +210,19 @@ body {
   justify-content: center;
 }
 
-/* ważne: obsługa linków */
 a.btn-ghost:link,
-a.btn-ghost:visited {
-  color: rgba(0,0,0,0.85);
-  text-decoration: none;
+a.btn-ghost:visited,
+a.btn-ghost:active,
+a.btn-ghost:focus {
+  color: rgba(0,0,0,0.85) !important;
+  text-decoration: none !important;
 }
 
-/* hover/focus */
 a.btn-ghost:hover,
-a.btn-ghost:focus,
-.btn-ghost:hover,
-.btn-ghost:focus {
-  color: #4c1d95;
-  text-decoration: none;
+.btn-ghost:hover {
+  color: #4c1d95 !important;
+  text-decoration: none !important;
 }
-
-
 
 /* Modal */
 .modal-backdrop {
@@ -370,5 +380,3 @@ input:focus, select:focus {
   color: #d32f2f !important;
   font-weight: 700;
 }
-
-
