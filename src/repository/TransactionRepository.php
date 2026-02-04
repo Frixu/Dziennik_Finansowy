@@ -129,6 +129,43 @@ public function listForUserInRange(int $userId, string $start, string $endExclus
     return $stmt->fetchAll();
 }
 
+public function listForUserInRangeFiltered(
+    int $userId,
+    string $start,
+    string $endExclusive,
+    int $categoryId = 0,
+    int $limit = 50
+): array {
+    $sql =
+        'SELECT t.id, t.type, t.category_id, t.amount, t.description, t.occurred_on, c.name AS category_name
+         FROM transactions t
+         JOIN categories c ON c.id = t.category_id
+         WHERE t.user_id = :user_id
+           AND t.occurred_on >= :start
+           AND t.occurred_on < :end';
+
+    if ($categoryId > 0) {
+        $sql .= ' AND t.category_id = :category_id';
+    }
+
+    $sql .= ' ORDER BY t.occurred_on DESC, t.id DESC LIMIT :limit';
+
+    $stmt = $this->pdo->prepare($sql);
+    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->bindValue(':start', $start);
+    $stmt->bindValue(':end', $endExclusive);
+
+    if ($categoryId > 0) {
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+    }
+
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetchAll();
+}
+
+
 public function findForUser(int $txId, int $userId): ?array
 {
     $stmt = $this->pdo->prepare(

@@ -102,13 +102,24 @@ $end = $endDate->format('Y-m-d');
 $selectedYear = $year;
 $selectedMonth = $month;
 
+$selectedCategoryId = (int)($_GET['category_id'] ?? 0);
+if ($selectedCategoryId < 0) $selectedCategoryId = 0;
+
+
 
     $categoryRepo = new CategoryRepository($pdo);
     $categoryService = new CategoryService($categoryRepo);
     $categories = $categoryService->listForUser($_SESSION['user_id']);
 
     $txRepo = new TransactionRepository($pdo);
-    $latestTransactions = $txRepo->listForUserInRange($_SESSION['user_id'], $start, $end, 50);
+    $latestTransactions = $txRepo->listForUserInRangeFiltered(
+    $_SESSION['user_id'],
+    $start,
+    $end,
+    $selectedCategoryId,
+    50
+);
+
     $kpi = $txRepo->monthSummary($_SESSION['user_id'], $start, $end);
 
     $incomeVsExpenseJson = json_encode([

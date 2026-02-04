@@ -98,6 +98,17 @@
             <?php endfor; ?>
           </select>
 
+          <select name="category_id">
+  <option value="">Wszystkie kategorie</option>
+  <?php foreach ($categories as $cat): ?>
+    <option value="<?= (int)$cat['id'] ?>"
+      <?= ((string)($selectedCategoryId ?? '') === (string)$cat['id']) ? 'selected' : '' ?>>
+      <?= htmlspecialchars($cat['name']) ?>
+    </option>
+  <?php endforeach; ?>
+</select>
+
+
           <button class="btn btn-ghost" type="submit">Filtruj</button>
 
           <a class="btn btn-ghost"
