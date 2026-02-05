@@ -103,6 +103,9 @@ $selectedYear = $year;
 $selectedMonth = $month;
 
 $selectedCategoryId = (int)($_GET['category_id'] ?? 0);
+$searchQuery = trim((string)($_GET['q'] ?? ''));
+if (strlen($searchQuery) > 100) $searchQuery = substr($searchQuery, 0, 100);
+
 if ($selectedCategoryId < 0) $selectedCategoryId = 0;
 
 
@@ -117,8 +120,19 @@ if ($selectedCategoryId < 0) $selectedCategoryId = 0;
     $start,
     $end,
     $selectedCategoryId,
+    $searchQuery,
     50
 );
+$topExpenses = $txRepo->topExpensesForUserInRange(
+    $_SESSION['user_id'],
+    $start,
+    $end,
+    $selectedCategoryId,
+    $searchQuery,
+    5
+);
+
+
 
     $kpi = $txRepo->monthSummary($_SESSION['user_id'], $start, $end);
 
@@ -129,6 +143,8 @@ if ($selectedCategoryId < 0) $selectedCategoryId = 0;
     require __DIR__ . '/../public/views/dashboard/dashboard.php';
     exit;
 }
+
+
 
 
 

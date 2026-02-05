@@ -111,6 +111,14 @@
 
           <button class="btn btn-ghost" type="submit">Filtruj</button>
 
+          <input
+  type="text"
+  name="q"
+  placeholder="Szukaj w opisie..."
+  value="<?= htmlspecialchars($searchQuery ?? '', ENT_QUOTES, 'UTF-8') ?>"
+  maxlength="100"
+/>
+
           <a class="btn btn-ghost"
              href="/transactions/export?year=<?= (int)$selectedYear ?>&month=<?= (int)$selectedMonth ?>">
             Eksport CSV
@@ -159,6 +167,47 @@
         </table>
       </div>
     </div>
+
+    <div class="section" style="margin-top:16px;">
+  <div class="section-header">
+    <div>
+      <h2>Top 5 wydatków w wybranym okresie</h2>
+      <div class="section-sub">
+        <?= htmlspecialchars($months[$selectedMonth] ?? '', ENT_QUOTES, 'UTF-8') ?> <?= (int)$selectedYear ?>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <?php if (empty($topExpenses)): ?>
+      <p style="margin:0; color: rgba(0,0,0,0.6);">Brak wydatków dla wybranych filtrów.</p>
+    <?php else: ?>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Kategoria</th>
+            <th>Opis</th>
+            <th>Kwota</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($topExpenses as $t): ?>
+            <tr>
+              <td><?= htmlspecialchars($t['occurred_on']) ?></td>
+              <td><?= htmlspecialchars($t['category_name']) ?></td>
+              <td><?= htmlspecialchars($t['description'] ?? '') ?></td>
+              <td class="amount amount-negative">
+                -<?= number_format((float)$t['amount'], 2, ',', ' ') ?> zł
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    <?php endif; ?>
+  </div>
+</div>
+
 
     <!-- WYKRES -->
     <div class="section">

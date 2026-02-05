@@ -107,33 +107,12 @@ public function expensesByCategory(int $userId, string $start, string $endExclus
     return $rows;
 }
 
-public function listForUserInRange(int $userId, string $start, string $endExclusive, int $limit = 50): array
-{
-    $stmt = $this->pdo->prepare(
-        'SELECT t.id, t.type, t.category_id, t.amount, t.description, t.occurred_on, c.name AS category_name
-         FROM transactions t
-         JOIN categories c ON c.id = t.category_id
-         WHERE t.user_id = :user_id
-           AND t.occurred_on >= :start
-           AND t.occurred_on < :end
-         ORDER BY t.occurred_on DESC, t.id DESC
-         LIMIT :limit'
-    );
-
-    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
-    $stmt->bindValue(':start', $start);
-    $stmt->bindValue(':end', $endExclusive);
-    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-    $stmt->execute();
-
-    return $stmt->fetchAll();
-}
-
 public function listForUserInRangeFiltered(
     int $userId,
     string $start,
     string $endExclusive,
     int $categoryId = 0,
+    string $query = '',
     int $limit = 50
 ): array {
     $sql =
@@ -148,6 +127,10 @@ public function listForUserInRangeFiltered(
         $sql .= ' AND t.category_id = :category_id';
     }
 
+    if ($query !== '') {
+        $sql .= ' AND COALESCE(t.description, \'\') ILIKE :q';
+    }
+
     $sql .= ' ORDER BY t.occurred_on DESC, t.id DESC LIMIT :limit';
 
     $stmt = $this->pdo->prepare($sql);
@@ -159,11 +142,65 @@ public function listForUserInRangeFiltered(
         $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
     }
 
+    if ($query !== '') {
+        $stmt->bindValue(':q', '%' . $query . '%', PDO::PARAM_STR);
+    }
+
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->execute();
 
     return $stmt->fetchAll();
 }
+
+
+public function topExpensesForUserInRange(
+    int $userId,
+    string $start,
+    string $endExclusive,
+    int $categoryId = 0,
+    string $query = '',
+    int $limit = 5
+): array {
+    $sql =
+        'SELECT t.id, t.amount, t.description, t.occurred_on, c.name AS category_name
+         FROM transactions t
+         JOIN categories c ON c.id = t.category_id
+         WHERE t.user_id = :user_id
+           AND t.type = \'expense\'
+           AND t.occurred_on >= :start
+           AND t.occurred_on < :end';
+
+    if ($categoryId > 0) {
+        $sql .= ' AND t.category_id = :category_id';
+    }
+
+    if ($query !== '') {
+        $sql .= ' AND COALESCE(t.description, \'\') ILIKE :q';
+    }
+
+    $sql .= ' ORDER BY t.amount DESC, t.occurred_on DESC, t.id DESC LIMIT :limit';
+
+    $stmt = $this->pdo->prepare($sql);
+    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->bindValue(':start', $start);
+    $stmt->bindValue(':end', $endExclusive);
+
+    if ($categoryId > 0) {
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+    }
+
+    if ($query !== '') {
+        $stmt->bindValue(':q', '%' . $query . '%', PDO::PARAM_STR);
+    }
+
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetchAll();
+}
+
+
+
 
 
 public function findForUser(int $txId, int $userId): ?array
