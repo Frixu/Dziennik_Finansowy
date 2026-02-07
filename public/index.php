@@ -313,7 +313,15 @@ if ($method === 'GET' && $path === '/transactions/export') {
     $end = $endDate->format('Y-m-d');
 
     $txRepo = new TransactionRepository($pdo);
-    $rows = $txRepo->listForUserInRange($_SESSION['user_id'], $start, $end, 5000);
+    $rows = $txRepo->listForUserInRangeFiltered(
+    $_SESSION['user_id'],
+    $start,
+    $end,
+    0,
+    '',
+    5000
+);
+
 
     $filename = sprintf('transakcje_%04d-%02d.csv', $year, $month);
 
